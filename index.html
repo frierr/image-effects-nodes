@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Effects Nodes Test</title>
+    <link rel="stylesheet" href="./nodes/image-node-style.css">
+    <link rel="stylesheet" href="./image-node.css">
+</head>
+<body>
+    <div class="wrap" id="wrap">
+        <div class="header-wrap">
+            <div class="header">IMAGE EFFECTS NODES TEST</div>
+            <div class="header-buttons-wrap">
+                <div class="header-button" id="header-help-button">i</div>
+            </div>
+        </div>
+        <div class="nodefield-wrap">
+            <fieldset>
+                <legend>NODE EDITOR ver.69420</legend>
+                <div class="nodefield" id="nodefield"></div>
+            </fieldset>
+        </div>
+        <div class="spacer" id="spacer">
+            <span>SPACER ver.314159265359</span>
+        </div>
+        <div class="output-wrap" id="output-wrap">
+            <div>
+                <div class="width-top">
+                    <span>WIDTH</span>
+                    <span id="span-width-top">1000px</span>
+                </div>
+                <div class="width-bottom">
+                    <span>WIDTH</span>
+                    <span id="span-width-bottom">1000px</span>
+                </div>
+                <div class="height-left">
+                    <span>HEIGHT</span>
+                    <span id="span-height-left">500px</span>
+                </div>
+                <div class="height-right">
+                    <span>HEIGHT</span>
+                    <span id="span-height-right">500px</span>
+                </div>
+                <span class="canvas-wrap">
+                    <div class="canvas-wrap-wrap">
+                        <div>IMAGE DIMENSIONS | W <span id="canvas-width">0</span>px | H <span id="canvas-height">0</span>px</div>
+                        <canvas id="output"></canvas>
+                    </div>
+                </span>
+            </div>
+        </div>
+    </div>
+    <!--<script src="https://cdn.jsdelivr.net/npm/gpu.js@latest/dist/gpu-browser.min.js"></script>-->
+    <script src="gpu-browser.min-2.15.0-FIX-GPUX.js"></script>
+    <script type="module">
+        const outputwrap = document.getElementById("output-wrap");
+        const spwt = document.getElementById("span-width-top");
+        const spwb = document.getElementById("span-width-bottom");
+        const sphl = document.getElementById("span-height-left");
+        const sphr = document.getElementById("span-height-right");
+        const output = document.getElementById("output");
+        const canvaswidth = document.getElementById("canvas-width");
+        const canvasheight = document.getElementById("canvas-height");
+        const spacer = document.getElementById("spacer");
+        const wrap = document.getElementById("wrap");
+        const helpbutton = document.getElementById("header-help-button");
+
+        import { NodeHandler } from "./nodes/image-node-handler.js";
+
+        window.onload = function() {
+            output.width = 0;
+            output.height = 0;
+            const nodehandler = new NodeHandler(document.getElementById("nodefield"), output, new GPUX());
+            updateWrapText();
+            output.addEventListener("draw", function() {
+                canvaswidth.textContent = output.width;
+                canvasheight.textContent = output.height;
+            },false);
+            new SpacerHandler(spacer, wrap, updateWrapText);
+            helpbutton.onclick = showHelpMenu;
+        }
+
+        window.onresize = function() {
+            updateWrapText();
+        }
+
+        function showHelpMenu() {
+            const wrapper = document.createElement("div");
+            wrapper.className = "help-menu-wrapper";
+
+            const helpmenuwrap = document.createElement("div");
+            helpmenuwrap.className = "help-menu-inner";
+            wrapper.appendChild(helpmenuwrap);
+
+            const helpmenutop = document.createElement("div");
+            helpmenutop.className = "help-menu-top";
+            helpmenuwrap.appendChild(helpmenutop);
+
+            const helpmenutitle = document.createElement("div");
+            helpmenutitle.textContent = "HELPMENU ver.16487212707";
+            helpmenutop.appendChild(helpmenutitle);
+            
+            const helpmenuspacer = document.createElement("div");
+            helpmenutop.appendChild(helpmenuspacer);
+
+            const helpmenubutton = document.createElement("div");
+            helpmenubutton.textContent = "x";
+            helpmenubutton.className = "help-menu-button";
+            helpmenubutton.onclick = function () {
+                wrapper.remove();
+            }
+            helpmenutop.appendChild(helpmenubutton);
+
+            const helpmenubot = document.createElement("div");
+            helpmenubot.className = "help-menu-bot";
+            helpmenubot.textContent = "Right-click on the NODE EDITOR to select and add nodes from the drop-down menu.\r\n" +
+            "Move the nodes by clicking and holding your cursor on their nameplates.\r\n" +
+            "\r\n" +
+            "Use SPACER to change the window size of the NODE EDITOR and OUTPUT\r\n" +
+            "\r\n" +
+            "The final image will be displayed on the OUTPUT window below.";
+            helpmenuwrap.appendChild(helpmenubot);
+
+            wrap.appendChild(wrapper);
+        }
+
+        function updateWrapText() {
+            const rect = outputwrap.getBoundingClientRect();
+            spwt.textContent = `${rect.width}px`;
+            spwb.textContent = `${rect.width}px`;
+            sphl.textContent = `${rect.height}px`;
+            sphr.textContent = `${rect.height}px`;
+            output.style.maxHeight = `${rect.height - 80}px`;
+            output.style.maxWidth = `${rect.width - 80}px`;
+        }
+
+        class SpacerHandler {
+            constructor(spacer, wrap, updater) {
+                this.spacer = spacer;
+                this.wrap = wrap;
+                this.updater = updater;
+
+                this.dragpoint = 0;
+                this.wrappoint = 500;
+                this.maxwrap = 1000;
+
+                const handler = this;
+
+                this.spacer.onmousedown = function(e) {
+                    e.preventDefault();
+                    handler.dragpoint = e.clientY;
+                    const rect = handler.wrap.getBoundingClientRect();
+                    handler.maxwrap = rect.height - 200;
+                    document.onmouseup = function() {
+                        document.onmouseup = null;
+                        document.onmousemove = null;
+                    }
+                    document.onmousemove = function(e) {
+                        e.preventDefault();
+                        handler.wrappoint = handler.wrappoint + (handler.dragpoint - e.clientY);
+                        if (handler.wrappoint < 200) {
+                            handler.wrappoint = 200;
+                        } else if (handler.wrappoint > handler.maxwrap) {
+                            handler.wrappoint = handler.maxwrap;
+                        }
+                        handler.dragpoint = e.clientY;
+                        handler.wrap.style.gridTemplateRows = `50px auto 5px ${handler.wrappoint}px`;
+                        handler.updater();
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
