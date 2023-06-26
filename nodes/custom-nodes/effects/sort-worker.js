@@ -45,7 +45,7 @@ onmessage = function(e) {
         }
     } else {
         //Sort without a mask
-        if(e.data[2]) {
+        if(e.data[3]) {
             //vertical
             for (var j = 0; j < pixelsum[0].length; j++) {
                 for (var i = 0; i < pixelsum.length; i++) {

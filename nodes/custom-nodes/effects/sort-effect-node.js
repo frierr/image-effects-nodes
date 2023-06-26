@@ -166,17 +166,17 @@ export class SortEffectNode extends GenericImageNode {
             if (this.inputtype2) {
                 /*Sort with a mask*/
                 const pixelsum = GPUGetPixelSumArrayMasked(this.parent.gpu, this.inputvalue1, this.inputvalue2);
-                this.worker.postMessage([true, pixelsum, this.getCheck()]);
+                this.worker.postMessage([true, pixelsum, ...this.getCheck()]);
             } else {
                 /*Sort without a mask*/
                 const pixelsum = GPUGetPixelSumArray(this.parent.gpu, this.inputvalue1);
-                this.worker.postMessage([false, pixelsum, this.getCheck()]);
+                this.worker.postMessage([false, pixelsum, ...this.getCheck()]);
             }
         }
     }
     getCheck() {
         const val = this.str.getValue();
-        return val == "top" || val == "right";
+        return [val == "top" || val == "right", val == "top" || val == "bottom"];
     }
     receiveInput(input, connector, connected) {
         //determine which input not received the input value
